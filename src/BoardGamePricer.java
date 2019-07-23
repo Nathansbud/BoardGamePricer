@@ -9,9 +9,13 @@ import java.util.Collections;
 
 public class BoardGamePricer {
     static private ArrayList<Game> scrapeGames(int pageCount, double filterPrice) {
+        return scrapeGames(1, pageCount, filterPrice);
+    }
+
+    static private ArrayList<Game> scrapeGames(int firstPage, int lastPage, double filterPrice) {
         ArrayList<Game> gameList = new ArrayList<>();
 
-        for(int i = 1; i < (pageCount+1); i++) {
+        for(int i = firstPage; i < (lastPage+1); i++) {
             try {
                 Document d = Jsoup.connect("https://boardgamegeek.com/browse/boardgame/page/"+i).get();
                 Elements rows = (d.getElementById("collectionitems").child(0).select("> tr"));
@@ -86,7 +90,7 @@ public class BoardGamePricer {
     }
 
     public static void main(String[] args) {
-        ArrayList<Game> gameList = scrapeGames(5, 30);
+        ArrayList<Game> gameList = scrapeGames(3, 40);
         Collections.sort(gameList, Game::compareTo);
 
         for(Game g : gameList) {
@@ -94,7 +98,7 @@ public class BoardGamePricer {
                 String shortLink = g.getAmazonNewPriceLink().split("\\?")[0];
                 shortLink = "https://amzn.com/"+shortLink.substring(shortLink.lastIndexOf("/")+1); //Put links into shortlink format
 
-                System.out.println(g.getRank() + ") "+ g.getName() + ": " + g.getAmazonNewPrice() + " [" + shortLink + "]");
+                System.out.println(g.getRank() + ") "+ g.getName() + ": " + String.format("%.2f", g.getAmazonNewPrice()) + " [" + shortLink + "] " + ((g.getAmazonLowPrice() > 0) ? (g.getAmazonLowPrice()) : ("")));
             }
         }
     }
